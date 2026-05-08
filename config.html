@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>K&D Finanças — Metas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .goals-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; margin-bottom: 1.5rem; }
+    .ring-svg { transform: rotate(-90deg); }
+    .no-goals { text-align:center; padding:3rem; color:var(--muted); font-size:14px; }
+    .no-goals i { font-size:48px; display:block; margin-bottom:1rem; opacity:0.3; }
+    .modal-input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+    .timeline-bar { height: 8px; background: var(--border); border-radius: 99px; overflow: hidden; margin: 6px 0 4px; }
+    .timeline-fill { height: 100%; border-radius: 99px; }
+    .goal-actions { display: flex; gap: 6px; margin-top: 10px; }
+    .btn-sm { padding: 7px 12px; border-radius: 8px; font-size: 11px; font-weight: 600; cursor: pointer; font-family: 'Sora', sans-serif; border: 1px solid var(--border); background: rgba(255,255,255,0.04); color: var(--muted); transition: all 0.15s; display: flex; align-items: center; gap: 5px; }
+    .btn-sm:hover { color: var(--text); border-color: var(--border2); }
+    .btn-sm.rose:hover { color: var(--rose); border-color: var(--rose); }
+    .btn-sm.teal:hover { color: var(--teal); border-color: var(--teal); }
+    .summary-row { display: flex; justify-content: space-between; align-items: center; font-size: 13px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+    .summary-row:last-child { border-bottom: none; }
+  </style>
+</head>
+<body>
+<div class="bg-orb o1"></div>
+<div class="bg-orb o2"></div>
+
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-icon">💕</div>
+    <div class="brand-name"><span>K</span>&<span>D</span> Finanças</div>
+  </div>
+  <span class="nav-label">Menu</span>
+  <a href="dashboard.html" class="nav-item"><i class="fa-solid fa-chart-pie"></i> Visão Geral</a>
+  <a href="metas.html"     class="nav-item active"><i class="fa-solid fa-bullseye"></i> Metas</a>
+  <a href="gastos.html"    class="nav-item"><i class="fa-solid fa-receipt"></i> Gastos</a>
+  <a href="config.html"    class="nav-item"><i class="fa-solid fa-gear"></i> Configurações</a>
+  <div class="sidebar-footer">
+    <div class="user-chip">
+      <div class="user-avatar" id="avatarInitial">K</div>
+      <div class="user-info">
+        <div class="name" id="userNameSide">Kaique</div>
+        <div class="role">Casal K&D</div>
+      </div>
+    </div>
+    <button class="btn-logout" onclick="logout()"><i class="fa-solid fa-arrow-right-from-bracket"></i> Sair</button>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="topbar">
+    <div class="topbar-title">Nossas <span>Metas</span></div>
+    <div class="topbar-right">
+      <button class="btn-primary" style="width:auto;padding:8px 16px;margin:0;" onclick="openModal()">
+        <i class="fa-solid fa-plus"></i> Nova Meta
+      </button>
+    </div>
+  </div>
+
+  <div class="content">
+    <!-- Summary bar -->
+    <div class="card mb-14">
+      <div class="card-header" style="margin-bottom:0">
+        <div class="card-title"><i class="fa-solid fa-chart-line text-teal"></i> Resumo das Metas</div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin-top:1rem;">
+        <div style="text-align:center;padding:0 1rem;border-right:1px solid var(--border)">
+          <div style="font-size:24px;font-weight:700;color:var(--teal)" id="sum-metas">0</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:3px">Metas ativas</div>
+        </div>
+        <div style="text-align:center;padding:0 1rem;border-right:1px solid var(--border)">
+          <div style="font-size:24px;font-weight:700;color:var(--amber)" id="sum-guardado">R$ 0</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:3px">Total guardado</div>
+        </div>
+        <div style="text-align:center;padding:0 1rem;">
+          <div style="font-size:24px;font-weight:700;color:var(--rose)" id="sum-mensal">R$ 0</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:3px">Poupar/mês (total)</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="goals-grid" id="goalsGrid"></div>
+  </div>
+</main>
+
+<!-- MODAL NOVA META -->
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title"><i class="fa-solid fa-bullseye text-rose"></i> Nova Meta</span>
+      <button class="modal-close" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-input-row">
+      <div class="form-group">
+        <label>Nome da meta</label>
+        <input type="text" id="g-nome" placeholder="Ex: Casa própria">
+      </div>
+      <div class="form-group">
+        <label>Ícone</label>
+        <select id="g-icon">
+          <option value="fa-house">🏠 Casa</option>
+          <option value="fa-plane">✈️ Viagem</option>
+          <option value="fa-car">🚗 Carro</option>
+          <option value="fa-ring">💍 Casamento</option>
+          <option value="fa-baby">👶 Filho</option>
+          <option value="fa-graduation-cap">🎓 Educação</option>
+          <option value="fa-device-laptop">💻 Eletrônico</option>
+          <option value="fa-heart">❤️ Outro</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-input-row">
+      <div class="form-group">
+        <label>Valor total (R$)</label>
+        <input type="number" id="g-total" placeholder="500000">
+      </div>
+      <div class="form-group">
+        <label>Já guardado (R$)</label>
+        <input type="number" id="g-atual" placeholder="0">
+      </div>
+    </div>
+    <div class="modal-input-row">
+      <div class="form-group">
+        <label>Prazo</label>
+        <input type="month" id="g-prazo">
+      </div>
+      <div class="form-group">
+        <label>Cor</label>
+        <select id="g-cor">
+          <option value="rose">🌹 Rosa</option>
+          <option value="teal">🍃 Verde</option>
+          <option value="amber">⭐ Âmbar</option>
+          <option value="blue">💙 Azul</option>
+          <option value="purple">💜 Roxo</option>
+        </select>
+      </div>
+    </div>
+    <button class="btn-primary" onclick="saveGoal()"><i class="fa-solid fa-plus"></i> Criar Meta</button>
+  </div>
+</div>
+
+<!-- MODAL DEPOSITAR -->
+<div class="modal-overlay" id="depositOverlay" onclick="if(event.target===this)closeDeposit()">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="depositTitle"><i class="fa-solid fa-piggy-bank text-teal"></i> Guardar na Meta</span>
+      <button class="modal-close" onclick="closeDeposit()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="form-group" style="margin-bottom:1rem">
+      <label>Valor a guardar (R$)</label>
+      <input type="number" id="depositVal" placeholder="500">
+    </div>
+    <button class="btn-primary" onclick="doDeposit()"><i class="fa-solid fa-piggy-bank"></i> Guardar</button>
+  </div>
+</div>
+
+<script src="../js/data.js"></script>
+<script>
+const user = requireAuth();
+document.getElementById('userNameSide').textContent = user.charAt(0).toUpperCase() + user.slice(1);
+document.getElementById('avatarInitial').textContent = user.charAt(0).toUpperCase();
+
+let depositGoalId = null;
+
+function render() {
+  const data = KD.get();
+  const totalGuardado = data.goals.reduce((a,g) => a+g.atual, 0);
+  const totalMensal = data.goals.reduce((a,g) => a + KD.calcMensalNecessario(g), 0);
+  document.getElementById('sum-metas').textContent = data.goals.length;
+  document.getElementById('sum-guardado').textContent = KD.fmtMoney(totalGuardado);
+  document.getElementById('sum-mensal').textContent = KD.fmtMoney(totalMensal);
+
+  const grid = document.getElementById('goalsGrid');
+  if (!data.goals.length) {
+    grid.innerHTML = `<div class="no-goals" style="grid-column:1/-1"><i class="fa-solid fa-bullseye"></i>Nenhuma meta ainda.<br>Clique em "Nova Meta" para começar!</div>`;
+    return;
+  }
+
+  grid.innerHTML = data.goals.map(g => {
+    const col = KD.COLORS[g.cor] || KD.COLORS.rose;
+    const pct = Math.min(100, Math.round(g.atual / g.total * 100));
+    const falta = Math.max(0, g.total - g.atual);
+    const mensal = KD.calcMensalNecessario(g);
+    const prazoLabel = KD.fmtMonthYear(g.prazo);
+
+    // SVG ring
+    const r = 36, cx = 44, cy = 44, circ = 2 * Math.PI * r;
+    const dash = (pct / 100) * circ;
+
+    return `<div class="goal-card">
+      <div class="goal-card-top">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:44px;height:44px;border-radius:12px;background:${col.bg};display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <i class="fa-solid ${g.icon}" style="font-size:20px;color:${col.fg}"></i>
+          </div>
+          <div>
+            <div class="goal-name">${g.nome}</div>
+            <div class="goal-target">Meta: ${KD.fmtMoney(g.total)}</div>
+          </div>
+        </div>
+        <div style="text-align:center">
+          <svg width="88" height="88" class="ring-svg">
+            <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="6"/>
+            <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${col.fg}" stroke-width="6"
+              stroke-dasharray="${dash} ${circ}" stroke-linecap="round"/>
+            <text x="${cx}" y="${cy+2}" text-anchor="middle" dominant-baseline="middle"
+              font-family="Sora,sans-serif" font-size="13" font-weight="700" fill="${col.fg}"
+              transform="rotate(90,${cx},${cy})">${pct}%</text>
+          </svg>
+        </div>
+      </div>
+
+      <div class="prog-bar"><div class="prog-fill" style="width:${pct}%;background:${col.fg}"></div></div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:10px 0;">
+        <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:8px;padding:8px;text-align:center">
+          <div style="font-size:13px;font-weight:700;color:${col.fg}">${KD.fmtMoney(g.atual)}</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:2px">Guardado</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:8px;padding:8px;text-align:center">
+          <div style="font-size:13px;font-weight:700;color:var(--muted)">${KD.fmtMoney(falta)}</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:2px">Faltam</div>
+        </div>
+      </div>
+
+      <div class="goal-tip">
+        <i class="fa-solid fa-lightbulb"></i>
+        Poupem <b style="color:var(--amber)">${KD.fmtMoney(mensal)}/mês</b> para chegar em <b style="color:var(--text)">${prazoLabel}</b>
+      </div>
+
+      <div class="goal-actions">
+        <button class="btn-sm teal" onclick="openDeposit(${g.id},'${g.nome}')"><i class="fa-solid fa-plus"></i> Guardar</button>
+        <button class="btn-sm rose" onclick="deleteGoal(${g.id})"><i class="fa-solid fa-trash"></i> Remover</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openModal()  { document.getElementById('modalOverlay').classList.add('open'); }
+function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); }
+
+function saveGoal() {
+  const nome  = document.getElementById('g-nome').value.trim();
+  const total = parseFloat(document.getElementById('g-total').value);
+  if (!nome || !total) { alert('Preencha nome e valor!'); return; }
+  KD.addGoal({
+    nome, icon: document.getElementById('g-icon').value,
+    cor: document.getElementById('g-cor').value,
+    total, atual: parseFloat(document.getElementById('g-atual').value) || 0,
+    prazo: document.getElementById('g-prazo').value,
+  });
+  closeModal();
+  ['g-nome','g-total','g-atual','g-prazo'].forEach(id => document.getElementById(id).value = '');
+  render();
+}
+
+function openDeposit(id, nome) {
+  depositGoalId = id;
+  document.getElementById('depositTitle').innerHTML = `<i class="fa-solid fa-piggy-bank text-teal"></i> Guardar em: ${nome}`;
+  document.getElementById('depositVal').value = '';
+  document.getElementById('depositOverlay').classList.add('open');
+}
+function closeDeposit() { document.getElementById('depositOverlay').classList.remove('open'); }
+function doDeposit() {
+  const v = parseFloat(document.getElementById('depositVal').value);
+  if (!v || v <= 0) { alert('Informe um valor válido!'); return; }
+  const data = KD.get();
+  const g = data.goals.find(g => g.id === depositGoalId);
+  if (g) { KD.updateGoal(depositGoalId, { atual: Math.min(g.total, g.atual + v) }); }
+  closeDeposit();
+  render();
+}
+
+function deleteGoal(id) {
+  if (confirm('Remover esta meta?')) { KD.removeGoal(id); render(); }
+}
+
+render();
+</script>
+</body>
+</html>
