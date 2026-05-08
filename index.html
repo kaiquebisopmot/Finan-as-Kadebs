@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>K&D Finanças — Login</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --rose:       #F43F6E;
+      --rose-dark:  #C0254E;
+      --rose-glow:  rgba(244,63,110,0.25);
+      --navy:       #0D0F1A;
+      --navy2:      #13162A;
+      --navy3:      #1A1E35;
+      --navy4:      #222645;
+      --card:       rgba(255,255,255,0.04);
+      --border:     rgba(255,255,255,0.08);
+      --text:       #F0F2FF;
+      --muted:      rgba(240,242,255,0.45);
+      --teal:       #00D4A1;
+      --amber:      #FFB830;
+    }
+
+    html, body {
+      height: 100%;
+      font-family: 'Sora', sans-serif;
+      background: var(--navy);
+      color: var(--text);
+      overflow: hidden;
+    }
+
+    /* animated background */
+    .bg {
+      position: fixed; inset: 0; z-index: 0;
+      background: radial-gradient(ellipse 80% 60% at 20% 10%, rgba(244,63,110,0.12) 0%, transparent 60%),
+                  radial-gradient(ellipse 60% 40% at 80% 80%, rgba(0,212,161,0.08) 0%, transparent 60%),
+                  var(--navy);
+    }
+    .bg-orb {
+      position: absolute; border-radius: 50%; filter: blur(80px); animation: float 8s ease-in-out infinite;
+    }
+    .bg-orb.o1 { width: 400px; height: 400px; background: rgba(244,63,110,0.08); top: -100px; left: -100px; animation-delay: 0s; }
+    .bg-orb.o2 { width: 300px; height: 300px; background: rgba(0,212,161,0.06); bottom: -50px; right: -50px; animation-delay: -3s; }
+    .bg-orb.o3 { width: 200px; height: 200px; background: rgba(255,184,48,0.05); top: 50%; left: 60%; animation-delay: -5s; }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-30px) scale(1.05); }
+    }
+
+    /* grid pattern */
+    .grid-overlay {
+      position: fixed; inset: 0; z-index: 0; opacity: 0.03;
+      background-image: linear-gradient(rgba(255,255,255,1) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(255,255,255,1) 1px, transparent 1px);
+      background-size: 50px 50px;
+    }
+
+    .login-wrap {
+      position: relative; z-index: 10;
+      height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      padding: 2rem;
+    }
+
+    .login-box {
+      width: 100%; max-width: 420px;
+      background: rgba(19,22,42,0.85);
+      backdrop-filter: blur(24px);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 2.5rem;
+      box-shadow: 0 40px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.03) inset;
+    }
+
+    .brand {
+      text-align: center; margin-bottom: 2rem;
+    }
+    .brand-icon {
+      width: 64px; height: 64px; margin: 0 auto 1rem;
+      background: linear-gradient(135deg, var(--rose), var(--rose-dark));
+      border-radius: 18px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 28px;
+      box-shadow: 0 8px 32px var(--rose-glow);
+    }
+    .brand h1 { font-size: 24px; font-weight: 700; letter-spacing: -0.5px; }
+    .brand h1 span { color: var(--rose); }
+    .brand p { font-size: 13px; color: var(--muted); margin-top: 6px; }
+
+    .form-group { margin-bottom: 1rem; }
+    .form-group label {
+      display: block; font-size: 12px; font-weight: 500;
+      color: var(--muted); margin-bottom: 6px; letter-spacing: 0.05em; text-transform: uppercase;
+    }
+    .input-wrap { position: relative; }
+    .input-wrap i {
+      position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+      color: var(--muted); font-size: 15px;
+    }
+    .form-group input {
+      width: 100%; padding: 13px 14px 13px 40px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--text);
+      font-family: 'Sora', sans-serif;
+      font-size: 14px;
+      transition: border-color 0.2s, background 0.2s;
+      outline: none;
+    }
+    .form-group input:focus {
+      border-color: var(--rose);
+      background: rgba(244,63,110,0.05);
+    }
+    .form-group input::placeholder { color: var(--muted); }
+
+    .error-msg {
+      display: none;
+      background: rgba(244,63,110,0.1);
+      border: 1px solid rgba(244,63,110,0.3);
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 13px;
+      color: #ff8fab;
+      margin-bottom: 1rem;
+    }
+    .error-msg.show { display: flex; align-items: center; gap: 8px; }
+
+    .btn-login {
+      width: 100%; padding: 14px;
+      background: linear-gradient(135deg, var(--rose), var(--rose-dark));
+      border: none; border-radius: 12px;
+      color: #fff; font-family: 'Sora', sans-serif;
+      font-size: 15px; font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.15s;
+      box-shadow: 0 4px 20px var(--rose-glow);
+      margin-top: 0.5rem;
+    }
+    .btn-login:hover { opacity: 0.9; transform: translateY(-1px); }
+    .btn-login:active { transform: translateY(0) scale(0.99); }
+
+    .hint {
+      margin-top: 1.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      font-size: 12px; color: var(--muted);
+    }
+    .hint code {
+      font-family: 'JetBrains Mono', monospace;
+      background: rgba(255,255,255,0.06);
+      padding: 2px 7px; border-radius: 6px;
+      font-size: 12px; color: var(--teal);
+    }
+  </style>
+</head>
+<body>
+  <div class="bg">
+    <div class="bg-orb o1"></div>
+    <div class="bg-orb o2"></div>
+    <div class="bg-orb o3"></div>
+  </div>
+  <div class="grid-overlay"></div>
+
+  <div class="login-wrap">
+    <div class="login-box">
+      <div class="brand">
+        <div class="brand-icon">💕</div>
+        <h1><span>K</span>&<span>D</span> Finanças</h1>
+        <p>Bem-vindos de volta, Kaique e Deborah</p>
+      </div>
+
+      <div class="error-msg" id="errMsg">
+        <i class="fa-solid fa-circle-exclamation"></i>
+        <span>Usuário ou senha incorretos.</span>
+      </div>
+
+      <div class="form-group">
+        <label>Usuário</label>
+        <div class="input-wrap">
+          <i class="fa-solid fa-user"></i>
+          <input type="text" id="username" placeholder="kaique ou deborah" autocomplete="username">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Senha</label>
+        <div class="input-wrap">
+          <i class="fa-solid fa-lock"></i>
+          <input type="password" id="password" placeholder="••••••••" autocomplete="current-password">
+        </div>
+      </div>
+
+      <button class="btn-login" onclick="doLogin()">Entrar no painel</button>
+
+      <div class="hint">
+        <p>Acesso exclusivo do casal</p>
+        <p style="margin-top:6px;">Usuários: <code>kaique</code> ou <code>deborah</code></p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // =====================================================
+    // CREDENCIAIS — altere aqui as senhas
+    // =====================================================
+    const USERS = {
+      kaique:  'minhasenha123',
+      deborah: 'minhasenha123'
+    };
+
+    document.getElementById('password').addEventListener('keydown', e => {
+      if (e.key === 'Enter') doLogin();
+    });
+
+    function doLogin() {
+      const u = document.getElementById('username').value.trim().toLowerCase();
+      const p = document.getElementById('password').value;
+      const err = document.getElementById('errMsg');
+      if (USERS[u] && USERS[u] === p) {
+        sessionStorage.setItem('kd_user', u);
+        window.location.href = 'pages/dashboard.html';
+      } else {
+        err.classList.add('show');
+        document.getElementById('password').value = '';
+        setTimeout(() => err.classList.remove('show'), 3000);
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>K&D Finanças — Painel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .spark-bar { display: inline-block; width: 3px; margin: 0 1px; border-radius: 2px; background: currentColor; vertical-align: bottom; opacity: 0.7; }
+    .cat-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+    .cat-row:last-child { border-bottom: none; }
+    .cat-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
+    .cat-bar { flex: 1; height: 4px; background: var(--border); border-radius: 99px; overflow: hidden; }
+    .cat-bar-fill { height: 100%; border-radius: 99px; }
+    .cat-label { font-size: 12px; color: var(--muted); min-width: 80px; }
+    .cat-val { font-size: 12px; font-weight: 600; min-width: 70px; text-align: right; }
+    .tip-card { background: rgba(255,184,48,0.05); border: 1px solid rgba(255,184,48,0.15); border-radius: var(--radius); padding: 1rem 1.25rem; display: flex; align-items: flex-start; gap: 12px; }
+    .tip-card i { color: var(--amber); font-size: 18px; margin-top: 2px; flex-shrink: 0; }
+    .tip-card .tip-title { font-size: 13px; font-weight: 600; margin-bottom: 3px; }
+    .tip-card .tip-text { font-size: 12px; color: var(--muted); line-height: 1.5; }
+  </style>
+</head>
+<body>
+<div class="bg-orb o1"></div>
+<div class="bg-orb o2"></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-icon">💕</div>
+    <div class="brand-name"><span>K</span>&<span>D</span> Finanças</div>
+  </div>
+  <span class="nav-label">Menu</span>
+  <a href="dashboard.html" class="nav-item active"><i class="fa-solid fa-chart-pie"></i> Visão Geral</a>
+  <a href="metas.html"     class="nav-item"><i class="fa-solid fa-bullseye"></i> Metas</a>
+  <a href="gastos.html"    class="nav-item"><i class="fa-solid fa-receipt"></i> Gastos</a>
+  <a href="config.html"    class="nav-item"><i class="fa-solid fa-gear"></i> Configurações</a>
+  <div class="sidebar-footer">
+    <div class="user-chip">
+      <div class="user-avatar" id="avatarInitial">K</div>
+      <div class="user-info">
+        <div class="name" id="userNameSide">Kaique</div>
+        <div class="role">Casal K&D</div>
+      </div>
+    </div>
+    <button class="btn-logout" onclick="logout()"><i class="fa-solid fa-arrow-right-from-bracket"></i> Sair</button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="topbar">
+    <div class="topbar-title">Visão <span>Geral</span></div>
+    <div class="topbar-right">
+      <div class="month-badge"><i class="fa-regular fa-calendar"></i> <span id="monthLabel"></span></div>
+    </div>
+  </div>
+
+  <div class="content">
+    <!-- METRICS -->
+    <div class="metrics-grid mb-24">
+      <div class="metric-card">
+        <div class="accent-line" style="background: var(--teal)"></div>
+        <div class="mc-icon" style="background:rgba(0,212,161,0.12)"><i class="fa-solid fa-arrow-trend-up" style="color:var(--teal)"></i></div>
+        <div class="mc-label">Renda Total</div>
+        <div class="mc-value text-teal" id="mc-renda">—</div>
+        <div class="mc-sub"><i class="fa-solid fa-circle" style="font-size:6px;color:var(--teal)"></i> este mês</div>
+      </div>
+      <div class="metric-card">
+        <div class="accent-line" style="background: var(--rose)"></div>
+        <div class="mc-icon" style="background:rgba(244,63,110,0.12)"><i class="fa-solid fa-arrow-trend-down" style="color:var(--rose)"></i></div>
+        <div class="mc-label">Total Gastos</div>
+        <div class="mc-value text-rose" id="mc-gastos">—</div>
+        <div class="mc-sub"><i class="fa-solid fa-circle" style="font-size:6px;color:var(--rose)"></i> este mês</div>
+      </div>
+      <div class="metric-card">
+        <div class="accent-line" style="background: var(--blue)"></div>
+        <div class="mc-icon" style="background:rgba(79,142,247,0.12)"><i class="fa-solid fa-wallet" style="color:var(--blue)"></i></div>
+        <div class="mc-label">Saldo Livre</div>
+        <div class="mc-value" id="mc-saldo" style="color:var(--blue)">—</div>
+        <div class="mc-sub" id="mc-saldo-pct"></div>
+      </div>
+      <div class="metric-card">
+        <div class="accent-line" style="background: var(--amber)"></div>
+        <div class="mc-icon" style="background:rgba(255,184,48,0.12)"><i class="fa-solid fa-piggy-bank" style="color:var(--amber)"></i></div>
+        <div class="mc-label">Total Guardado</div>
+        <div class="mc-value text-amber" id="mc-guardado">—</div>
+        <div class="mc-sub"><i class="fa-solid fa-circle" style="font-size:6px;color:var(--amber)"></i> nas metas</div>
+      </div>
+    </div>
+
+    <!-- CHART + CATS -->
+    <div class="grid-65-35 mb-14">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><i class="fa-solid fa-chart-column text-blue"></i> Gastos por Categoria</div>
+        </div>
+        <div class="chart-wrap" style="height:200px"><canvas id="chartBar" role="img" aria-label="Gastos por categoria este mês"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><i class="fa-solid fa-list text-rose"></i> Ranking</div>
+        </div>
+        <div id="catRanking"></div>
+      </div>
+    </div>
+
+    <!-- METAS PREVIEW + TXS -->
+    <div class="two-col mb-14">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><i class="fa-solid fa-bullseye text-rose"></i> Metas em destaque</div>
+          <a href="metas.html" style="font-size:12px;color:var(--muted);text-decoration:none;">Ver todas →</a>
+        </div>
+        <div id="goalPreview"></div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><i class="fa-solid fa-clock-rotate-left text-teal"></i> Últimos gastos</div>
+          <a href="gastos.html" style="font-size:12px;color:var(--muted);text-decoration:none;">Ver todos →</a>
+        </div>
+        <div id="txPreview"></div>
+      </div>
+    </div>
+
+    <!-- DICA -->
+    <div id="tipArea"></div>
+  </div>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="../js/data.js"></script>
+<script>
+const user = requireAuth();
+document.getElementById('userNameSide').textContent = user.charAt(0).toUpperCase() + user.slice(1);
+document.getElementById('avatarInitial').textContent = user.charAt(0).toUpperCase();
+document.getElementById('monthLabel').textContent = new Date().toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+
+function render() {
+  const data = KD.get();
+  const stats = KD.calcStats();
+
+  // Metrics
+  document.getElementById('mc-renda').textContent    = KD.fmtMoney(stats.renda);
+  document.getElementById('mc-gastos').textContent   = KD.fmtMoney(stats.gastos);
+  document.getElementById('mc-guardado').textContent = KD.fmtMoney(stats.guardado);
+  const saldoEl = document.getElementById('mc-saldo');
+  saldoEl.textContent = KD.fmtMoney(stats.saldo);
+  saldoEl.style.color = stats.saldo >= 0 ? 'var(--blue)' : 'var(--rose)';
+  const pct = stats.renda ? Math.round(stats.saldo / stats.renda * 100) : 0;
+  document.getElementById('mc-saldo-pct').innerHTML = `<i class="fa-solid fa-circle" style="font-size:6px;color:var(--blue)"></i> ${pct}% da renda`;
+
+  // Categories
+  const cats = {};
+  data.transactions.forEach(t => cats[t.cat] = (cats[t.cat] || 0) + t.val);
+  const sorted = Object.entries(cats).sort((a, b) => b[1] - a[1]);
+  const maxVal = sorted[0]?.[1] || 1;
+
+  // Bar chart
+  const barColors = sorted.map(([cat]) => KD.COLORS[KD.CATS[cat]?.cor || 'blue']?.hex || '#4F8EF7');
+  if (window._barChart) window._barChart.destroy();
+  window._barChart = new Chart(document.getElementById('chartBar'), {
+    type: 'bar',
+    data: {
+      labels: sorted.map(([c]) => c),
+      datasets: [{ data: sorted.map(([,v]) => v), backgroundColor: barColors, borderRadius: 6, borderSkipped: false }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: 'rgba(240,242,255,0.5)', font: { family: 'Sora', size: 11 } } },
+        y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: 'rgba(240,242,255,0.5)', font: { family: 'Sora', size: 11 }, callback: v => 'R$ ' + v.toLocaleString('pt-BR') } }
+      }
+    }
+  });
+
+  // Ranking
+  document.getElementById('catRanking').innerHTML = sorted.slice(0,6).map(([cat, val]) => {
+    const cfg = KD.CATS[cat] || { icon: 'fa-ellipsis', cor: 'blue' };
+    const col = KD.COLORS[cfg.cor] || KD.COLORS.blue;
+    const pct = Math.round(val / maxVal * 100);
+    return `<div class="cat-row">
+      <div class="cat-icon" style="background:${col.bg}"><i class="fa-solid ${cfg.icon}" style="color:${col.fg}"></i></div>
+      <span class="cat-label">${cat}</span>
+      <div class="cat-bar"><div class="cat-bar-fill" style="width:${pct}%;background:${col.fg}"></div></div>
+      <span class="cat-val" style="color:${col.fg}">${KD.fmtMoney(val)}</span>
+    </div>`;
+  }).join('');
+
+  // Goals preview (top 2)
+  document.getElementById('goalPreview').innerHTML = data.goals.slice(0,2).map(g => {
+    const col = KD.COLORS[g.cor] || KD.COLORS.rose;
+    const pct = Math.min(100, Math.round(g.atual / g.total * 100));
+    const mensal = KD.calcMensalNecessario(g);
+    return `<div style="margin-bottom:14px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+        <div style="width:34px;height:34px;border-radius:10px;background:${col.bg};display:flex;align-items:center;justify-content:center;font-size:15px;"><i class="fa-solid ${g.icon}" style="color:${col.fg}"></i></div>
+        <div style="flex:1;"><div style="font-size:13px;font-weight:600">${g.nome}</div><div style="font-size:11px;color:var(--muted)">Meta: ${KD.fmtMoney(g.total)}</div></div>
+        <div style="text-align:right"><div style="font-size:18px;font-weight:700;color:${col.fg}">${pct}%</div></div>
+      </div>
+      <div class="prog-bar"><div class="prog-fill" style="width:${pct}%;background:${col.fg}"></div></div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:5px;">
+        <span>Guardado: <b style="color:${col.fg}">${KD.fmtMoney(g.atual)}</b></span>
+        <span>Poupar/mês: <b style="color:var(--amber)">${KD.fmtMoney(mensal)}</b></span>
+      </div>
+    </div>`;
+  }).join('') || '<p style="font-size:13px;color:var(--muted);text-align:center;padding:1rem">Nenhuma meta cadastrada.</p>';
+
+  // Transactions preview (last 5)
+  document.getElementById('txPreview').innerHTML = [...data.transactions].reverse().slice(0,5).map(t => {
+    const cfg = KD.CATS[t.cat] || { icon: 'fa-ellipsis', cor: 'blue' };
+    const col = KD.COLORS[cfg.cor] || KD.COLORS.blue;
+    return `<div class="tx-row">
+      <div class="tx-icon" style="background:${col.bg}"><i class="fa-solid ${cfg.icon}" style="color:${col.fg}"></i></div>
+      <div class="tx-info"><div class="tx-name">${t.desc}</div><div class="tx-meta">${t.cat} · ${t.quem}</div></div>
+      <span class="tx-amount text-rose">- ${KD.fmtMoney(t.val)}</span>
+    </div>`;
+  }).join('') || '<p style="font-size:13px;color:var(--muted);text-align:center;padding:1rem">Nenhum gasto ainda.</p>';
+
+  // Tip
+  const tips = [];
+  if (stats.saldo < 0) tips.push({ title: '⚠️ Atenção!', text: 'Os gastos estão maiores que a renda este mês. Hora de revisar!' });
+  else if (pct < 15) tips.push({ title: '💡 Dica', text: 'Seu saldo livre está baixo. Tente reduzir gastos variáveis como lazer e roupas.' });
+  const maisUrgente = [...data.goals].sort((a,b) => KD.calcMensalNecessario(b) - KD.calcMensalNecessario(a))[0];
+  if (maisUrgente) tips.push({ title: '🎯 Meta prioritária', text: `Para chegar na meta "${maisUrgente.nome}" no prazo, poupem ${KD.fmtMoney(KD.calcMensalNecessario(maisUrgente))}/mês.` });
+  if (tips.length) {
+    document.getElementById('tipArea').innerHTML = tips.map(tp => `<div class="tip-card mb-14"><i class="fa-solid fa-lightbulb"></i><div><div class="tip-title">${tp.title}</div><div class="tip-text">${tp.text}</div></div></div>`).join('');
+  }
+}
+
+render();
+</script>
+</body>
+</html>

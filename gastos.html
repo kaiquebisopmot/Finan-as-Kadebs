@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>K&D Finanças — Gastos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .filter-bar { display:flex; gap:6px; margin-bottom:14px; flex-wrap:wrap; }
+    .filter-btn { padding:6px 14px; border-radius:99px; font-size:12px; font-weight:500; cursor:pointer; border:1px solid var(--border); background:transparent; color:var(--muted); font-family:'Sora',sans-serif; transition:all 0.15s; }
+    .filter-btn.active { background:rgba(244,63,110,0.12); border-color:rgba(244,63,110,0.3); color:var(--rose); }
+    .tx-full-row { display:flex; align-items:center; gap:12px; padding:11px 0; border-bottom:1px solid var(--border); }
+    .tx-full-row:last-child { border-bottom:none; }
+    .donut-wrap { position:relative; width:100%; height:200px; }
+    .quem-badge { display:inline-flex; align-items:center; padding:2px 8px; border-radius:99px; font-size:10px; font-weight:600; }
+  </style>
+</head>
+<body>
+<div class="bg-orb o1"></div>
+<div class="bg-orb o2"></div>
+
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-icon">💕</div>
+    <div class="brand-name"><span>K</span>&<span>D</span> Finanças</div>
+  </div>
+  <span class="nav-label">Menu</span>
+  <a href="dashboard.html" class="nav-item"><i class="fa-solid fa-chart-pie"></i> Visão Geral</a>
+  <a href="metas.html"     class="nav-item"><i class="fa-solid fa-bullseye"></i> Metas</a>
+  <a href="gastos.html"    class="nav-item active"><i class="fa-solid fa-receipt"></i> Gastos</a>
+  <a href="config.html"    class="nav-item"><i class="fa-solid fa-gear"></i> Configurações</a>
+  <div class="sidebar-footer">
+    <div class="user-chip">
+      <div class="user-avatar" id="avatarInitial">K</div>
+      <div class="user-info">
+        <div class="name" id="userNameSide">Kaique</div>
+        <div class="role">Casal K&D</div>
+      </div>
+    </div>
+    <button class="btn-logout" onclick="logout()"><i class="fa-solid fa-arrow-right-from-bracket"></i> Sair</button>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="topbar">
+    <div class="topbar-title">Registro de <span>Gastos</span></div>
+    <div class="topbar-right">
+      <button class="btn-primary" style="width:auto;padding:8px 16px;margin:0;" onclick="openModal()">
+        <i class="fa-solid fa-plus"></i> Novo Gasto
+      </button>
+    </div>
+  </div>
+
+  <div class="content">
+    <!-- Metrics -->
+    <div class="metrics-grid mb-14" style="grid-template-columns:repeat(3,1fr)">
+      <div class="metric-card">
+        <div class="accent-line" style="background:var(--rose)"></div>
+        <div class="mc-icon" style="background:rgba(244,63,110,0.12)"><i class="fa-solid fa-receipt" style="color:var(--rose)"></i></div>
+        <div class="mc-label">Total Gastos</div>
+        <div class="mc-value text-rose" id="mc-total">—</div>
+        <div class="mc-sub" id="mc-count"></div>
+      </div>
+      <div class="metric-card">
+        <div class="accent-line" style="background:var(--blue)"></div>
+        <div class="mc-icon" style="background:rgba(79,142,247,0.12)"><i class="fa-solid fa-user" style="color:var(--blue)"></i></div>
+        <div class="mc-label">Kaique gastou</div>
+        <div class="mc-value text-blue" id="mc-kaique">—</div>
+        <div class="mc-sub"><i class="fa-solid fa-circle" style="font-size:6px;color:var(--blue)"></i> individual</div>
+      </div>
+      <div class="metric-card">
+        <div class="accent-line" style="background:var(--purple)"></div>
+        <div class="mc-icon" style="background:rgba(168,85,247,0.12)"><i class="fa-solid fa-user" style="color:var(--purple)"></i></div>
+        <div class="mc-label">Deborah gastou</div>
+        <div class="mc-value text-purple" id="mc-deborah">—</div>
+        <div class="mc-sub"><i class="fa-solid fa-circle" style="font-size:6px;color:var(--purple)"></i> individual</div>
+      </div>
+    </div>
+
+    <div class="grid-65-35 mb-14">
+      <!-- Transactions list -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><i class="fa-solid fa-list text-rose"></i> Todos os Gastos</div>
+        </div>
+        <div class="filter-bar" id="filterBar">
+          <button class="filter-btn active" data-cat="Todos" onclick="setFilter('Todos',this)">Todos</button>
+          <button class="filter-btn" data-cat="Moradia"     onclick="setFilter('Moradia',this)">🏠 Moradia</button>
+          <button class="filter-btn" data-cat="Alimentação" onclick="setFilter('Alimentação',this)">🛒 Alimentação</button>
+          <button class="filter-btn" data-cat="Transporte"  onclick="setFilter('Transporte',this)">🚗 Transporte</button>
+          <button class="filter-btn" data-cat="Saúde"       onclick="setFilter('Saúde',this)">💊 Saúde</button>
+          <button class="filter-btn" data-cat="Lazer"       onclick="setFilter('Lazer',this)">🎟️ Lazer</button>
+          <button class="filter-btn" data-cat="Outros"      onclick="setFilter('Outros',this)">• Outros</button>
+        </div>
+        <div id="txList"></div>
+      </div>
+
+      <!-- Donut chart -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><i class="fa-solid fa-chart-pie text-blue"></i> Por categoria</div>
+        </div>
+        <div class="donut-wrap">
+          <canvas id="chartDonut" role="img" aria-label="Distribuição de gastos por categoria"></canvas>
+        </div>
+        <div id="donutLegend" style="margin-top:10px;"></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title"><i class="fa-solid fa-receipt text-rose"></i> Novo Gasto</span>
+      <button class="modal-close" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Descrição</label>
+        <input type="text" id="t-desc" placeholder="Ex: Mercado">
+      </div>
+      <div class="form-group">
+        <label>Valor (R$)</label>
+        <input type="number" id="t-val" placeholder="250">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Categoria</label>
+        <select id="t-cat">
+          <option>Moradia</option><option>Alimentação</option><option>Transporte</option>
+          <option>Saúde</option><option>Lazer</option><option>Educação</option>
+          <option>Roupas</option><option>Outros</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Quem pagou</label>
+        <select id="t-quem">
+          <option>Kaique</option><option>Deborah</option><option>Casal</option>
+        </select>
+      </div>
+    </div>
+    <button class="btn-primary" onclick="saveTx()"><i class="fa-solid fa-plus"></i> Registrar Gasto</button>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="../js/data.js"></script>
+<script>
+const user = requireAuth();
+document.getElementById('userNameSide').textContent = user.charAt(0).toUpperCase() + user.slice(1);
+document.getElementById('avatarInitial').textContent = user.charAt(0).toUpperCase();
+
+let activeFilter = 'Todos';
+let donutChart = null;
+
+function setFilter(cat, btn) {
+  activeFilter = cat;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderList();
+}
+
+function render() {
+  const data = KD.get();
+  const txs  = data.transactions;
+  const total = txs.reduce((a,t) => a+t.val, 0);
+  const kaique  = txs.filter(t => t.quem === 'Kaique').reduce((a,t) => a+t.val, 0);
+  const deborah = txs.filter(t => t.quem === 'Deborah').reduce((a,t) => a+t.val, 0);
+  document.getElementById('mc-total').textContent   = KD.fmtMoney(total);
+  document.getElementById('mc-count').innerHTML     = `<i class="fa-solid fa-circle" style="font-size:6px;color:var(--rose)"></i> ${txs.length} lançamentos`;
+  document.getElementById('mc-kaique').textContent  = KD.fmtMoney(kaique);
+  document.getElementById('mc-deborah').textContent = KD.fmtMoney(deborah);
+  renderList();
+  renderDonut();
+}
+
+function renderList() {
+  const data = KD.get();
+  let txs = [...data.transactions].reverse();
+  if (activeFilter !== 'Todos') txs = txs.filter(t => t.cat === activeFilter);
+
+  const quemColors = { Kaique:'var(--blue)', Deborah:'var(--purple)', Casal:'var(--teal)' };
+  const quemBg    = { Kaique:'rgba(79,142,247,0.12)', Deborah:'rgba(168,85,247,0.12)', Casal:'rgba(0,212,161,0.12)' };
+
+  document.getElementById('txList').innerHTML = txs.length
+    ? txs.map((t, i) => {
+        const cfg = KD.CATS[t.cat] || { icon:'fa-ellipsis', cor:'blue' };
+        const col = KD.COLORS[cfg.cor] || KD.COLORS.blue;
+        const realIdx = data.transactions.findIndex(tx => tx.id === t.id);
+        return `<div class="tx-full-row">
+          <div class="tx-icon" style="background:${col.bg}"><i class="fa-solid ${cfg.icon}" style="color:${col.fg}"></i></div>
+          <div class="tx-info">
+            <div class="tx-name">${t.desc}</div>
+            <div class="tx-meta" style="display:flex;align-items:center;gap:6px;margin-top:3px">
+              <span class="quem-badge" style="background:${quemBg[t.quem]||'rgba(255,255,255,0.06)'};color:${quemColors[t.quem]||'var(--muted)'}"><i class="fa-solid fa-user" style="font-size:9px"></i> ${t.quem}</span>
+              <span>${t.cat}</span>
+              ${t.date ? `<span>· ${t.date}</span>` : ''}
+            </div>
+          </div>
+          <span class="tx-amount text-rose">- ${KD.fmtMoney(t.val)}</span>
+          <button class="tx-del" onclick="delTx(${t.id})"><i class="fa-solid fa-xmark"></i></button>
+        </div>`;
+      }).join('')
+    : '<p style="font-size:13px;color:var(--muted);text-align:center;padding:2rem">Nenhum gasto nesta categoria.</p>';
+}
+
+function renderDonut() {
+  const data = KD.get();
+  const cats = {};
+  data.transactions.forEach(t => cats[t.cat] = (cats[t.cat] || 0) + t.val);
+  const sorted = Object.entries(cats).sort((a,b) => b[1]-a[1]);
+  const labels = sorted.map(([c]) => c);
+  const values = sorted.map(([,v]) => v);
+  const colors = labels.map(l => KD.COLORS[KD.CATS[l]?.cor || 'blue']?.hex || '#4F8EF7');
+  const total  = values.reduce((a,v) => a+v, 0);
+
+  if (donutChart) donutChart.destroy();
+  donutChart = new Chart(document.getElementById('chartDonut'), {
+    type: 'doughnut',
+    data: { labels, datasets: [{ data: values, backgroundColor: colors, borderWidth: 3, borderColor: '#1A1E35', hoverOffset: 6 }] },
+    options: {
+      responsive: true, maintainAspectRatio: false, cutout: '68%',
+      plugins: { legend: { display: false } }
+    }
+  });
+
+  document.getElementById('donutLegend').innerHTML = sorted.map(([cat, val]) => {
+    const col = KD.COLORS[KD.CATS[cat]?.cor || 'blue'] || KD.COLORS.blue;
+    const pct = total ? Math.round(val / total * 100) : 0;
+    return `<div style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:12px;">
+      <span style="width:10px;height:10px;border-radius:3px;background:${col.hex};flex-shrink:0"></span>
+      <span style="flex:1;color:var(--muted)">${cat}</span>
+      <span style="font-weight:600">${pct}%</span>
+      <span style="color:var(--muted)">${KD.fmtMoney(val)}</span>
+    </div>`;
+  }).join('');
+}
+
+function delTx(id) {
+  if (confirm('Remover este gasto?')) { KD.removeTransaction(id); render(); }
+}
+
+function openModal()  { document.getElementById('modalOverlay').classList.add('open'); }
+function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); }
+
+function saveTx() {
+  const desc = document.getElementById('t-desc').value.trim();
+  const val  = parseFloat(document.getElementById('t-val').value);
+  if (!desc || !val) { alert('Preencha descrição e valor!'); return; }
+  KD.addTransaction({ desc, val, cat: document.getElementById('t-cat').value, quem: document.getElementById('t-quem').value });
+  ['t-desc','t-val'].forEach(id => document.getElementById(id).value = '');
+  closeModal(); render();
+}
+
+render();
+</script>
+</body>
+</html>
